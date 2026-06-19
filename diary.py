@@ -1,0 +1,65 @@
+import datetime
+
+def saveDiaryEntry():
+    with open("diary.txt", "a") as f:
+        date = datetime.datetime.now().strftime("%d/%m/%y")
+        entry = input("Write your diary entry: ")
+        if date in diary:
+            diary[date] = diary[date] + "\n" + entry
+        else:
+            diary[date] = entry
+        f.write(date + "\n")
+        f.write(entry + "\n")
+
+def loadDiaryEntries():
+    diary = {}
+    try:
+        with open("diary.txt", "r") as f:
+            lines = f.readlines()
+            for i in range (0, len(lines)-1, 2):
+                date = lines[i].strip()
+                entry = lines[i+1].strip()
+                if date in diary:
+                    diary[date] = diary[date] + "\n" + entry
+                else:
+                    diary[date] = entry
+
+    except FileNotFoundError:
+        pass
+    return diary
+
+
+diary = loadDiaryEntries()
+
+print("\nWelcome to your diary! You can...")
+print("write a diary entry and read past diary entries by date\n")
+nextInput = input("What would you like to do?\nd -> diary entry\nr -> read diary\nq -> quit\n ")
+
+while nextInput != "q":
+
+    # diary entry
+    if nextInput == "d":
+        saveDiaryEntry()
+
+    # read past diary entry by date
+    elif nextInput == "r":
+        dayToRead = input("Which day from your diary do you want to read? Please enter a date in the form DD/MM/YY: ")
+        if dayToRead in diary:
+            print(dayToRead + ":\n" + diary[dayToRead] +"\n")
+        else:
+            print("No diary entry for this day")
+
+
+    else:
+        print("Please only input d, r, or q")
+        
+    nextInput = input("What would you like to do?\nd -> diary entry\nr -> read diary\nq -> quit\n ")
+
+print("Hope you had a reflective session! Your diary entries are saved for you when you come back.")
+
+
+
+
+
+    
+
