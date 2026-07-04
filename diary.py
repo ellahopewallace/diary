@@ -61,14 +61,43 @@ def logMood():
         return logMood()
     else:
         print("\nYou logged a " + motivationalMessages[mood][0] + " mood.\n" + moodDependingMessage(mood)+"\n")
+        saveMoodEntry(mood)
+
+def loadMoods():
+    moodLogs = {}
+    try:
+        with open("moodLogs.txt", "r") as f:
+            lines = f.readlines()
+            for i in range (0, len(lines)-1, 2):
+                date = lines[i].strip()
+                mood = lines[i+1].strip()
+                if date in moodLogs:
+                    moodLogs[date].append(mood)
+                else:
+                    moodLogs[date] = [mood]
+
+    except FileNotFoundError:
+        pass
+    return moodLogs
+
+def saveMoodEntry(mood):
+    with open("moodLogs.txt", "a") as f:
+        date = datetime.datetime.now().strftime("%d/%m/%y")
+        if date in moodLogs:
+            moodLogs[date].append(mood)
+        else:
+            moodLogs[date] = [mood]
+        f.write(date + "\n")
+        f.write(mood + "\n")
 
 
 diary = loadDiaryEntries()
 motivationalMessages = loadMotivationalMessages()
+moodLogs = loadMoods()
 
 print("\nWelcome to your diary! You can...")
-print("write a diary entry and read past diary entries by date\n")
-nextInput = input("What would you like to do?\nm -> log mood\nd -> diary entry\nr -> read diary\nq -> quit\n ")
+print("log your moods, write a diary entry and read past diary entries by date\n")
+nextInput = input("What would you like to do?\nm -> mood log\nd -> diary entry\nr -> read diary\nq -> quit\n ")
 
 while nextInput != "q":
 
@@ -92,13 +121,8 @@ while nextInput != "q":
     else:
         print("Please only input d, r, or q")
         
-    nextInput = input("What would you like to do?\nm -> log mood\nd -> diary entry\nr -> read diary\nq -> quit\n ")
+    nextInput = input("What would you like to do?\nm -> mood log\nd -> diary entry\nr -> read diary\nq -> quit\n ")
 
-print("Hope you had a reflective session! Your diary entries are saved for you when you come back.")
-
-
-
-
-
+print("Hope you had a reflective session! Your diary entries and moods are saved for you when you come back.")
     
 
