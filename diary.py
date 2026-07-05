@@ -1,5 +1,8 @@
+import matplotlib.pyplot as plt
+import dayplot as dp
 import datetime
 import random
+from statistics import multimode
 
 def saveDiaryEntry():
     with open("diary.txt", "a") as f:
@@ -48,6 +51,8 @@ def moodDependingMessage(mood):
     randomMessage = motivationalMessages[mood][randomNumber]
     return randomMessage
 
+moodConverter = {"1": "Happy", "2": "Sad", "3": "Angry", "4": "Fine", "5": "Stressed"}
+
 def logMood():
     print ("\nKEY:")
     print ("1 -> Happy/good.")
@@ -61,7 +66,7 @@ def logMood():
         return logMood()
     else:
         print("\nYou logged a " + motivationalMessages[mood][0] + " mood.\n" + moodDependingMessage(mood)+"\n")
-        saveMoodEntry(mood)
+        saveMoodEntry(moodConverter[mood])
 
 def loadMoods():
     moodLogs = {}
@@ -82,7 +87,7 @@ def loadMoods():
 
 def saveMoodEntry(mood):
     with open("moodLogs.txt", "a") as f:
-        date = datetime.datetime.now().strftime("%d/%m/%y")
+        date = datetime.datetime.now().strftime("%Y-%m-%d")
         if date in moodLogs:
             moodLogs[date].append(mood)
         else:
@@ -90,20 +95,52 @@ def saveMoodEntry(mood):
         f.write(date + "\n")
         f.write(mood + "\n")
 
+def displayCalender():
+    fig, ax = plt.subplots(figsize=(16,4))
+    dp.calendar(
+        dates = list(moodLogs.keys()),
+        values = overallMoods(),
+        start_date = f"{datetime.datetime.now().year}-01-01",
+        end_date = f"{datetime.datetime.now().year}-12-31",
+        colors = {
+            "Happy": "#FFE66C",
+            "Sad": "#4C8CE4",
+            "Angry": "#B84747",
+            "Fine": "#73B050",
+            "Stressed": "#FF97D0",
+        },
+        month_grid=True,
+        legend = True,
+        ax = ax,
+    )
+    ax.set_title("Mood calendar")
+    plt.show()
+
+def overallMoods():
+    biggestMoods = []
+    for day in moodLogs.values():
+        biggestMoods.append(multimode(day)[-1]) # most common mood that day, tie breaker falls to most recent
+    return biggestMoods
+
 
 diary = loadDiaryEntries()
 motivationalMessages = loadMotivationalMessages()
 moodLogs = loadMoods()
 
+
 print("\nWelcome to your diary! You can...")
-print("log your moods, write a diary entry and read past diary entries by date\n")
-nextInput = input("What would you like to do?\nm -> mood log\nd -> diary entry\nr -> read diary\nq -> quit\n ")
+print("log your moods, view your mood calender, write a diary entry and read past diary entries by date\n")
+nextInput = input("What would you like to do?\nm -> mood log\nc -> view mood calendar\nd -> diary entry\nr -> read diary\nq -> quit\n ")
 
 while nextInput != "q":
 
     # mood entry
     if nextInput == "m":
         logMood()
+
+    # mood calendar
+    elif nextInput == "c":
+        displayCalender()
 
     # diary entry
     elif nextInput == "d":
@@ -117,12 +154,9 @@ while nextInput != "q":
         else:
             print("No diary entry for this day")
 
-
     else:
-        print("Please only input d, r, or q")
+        print("Please only input m, c, d, r, or q")
         
-    nextInput = input("What would you like to do?\nm -> mood log\nd -> diary entry\nr -> read diary\nq -> quit\n ")
+    nextInput = input("What would you like to do?\nm -> mood log\nc -> view mood calendar\nd -> diary entry\nr -> read diary\nq -> quit\n ")
 
-print("Hope you had a reflective session! Your diary entries and moods are saved for you when you come back.")
-    
-
+print("Hope you had a reflective session! Your diary entries and moods are saved for you when you come back.")   
